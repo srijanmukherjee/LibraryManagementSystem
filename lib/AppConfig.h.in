@@ -1,0 +1,4 @@
+#define App_VERSION_MAJOR @App_VERSION_MAJOR@
+#define App_VERSION_MINOR @App_VERSION_MINOR@
+#define EXIT_DB_ERROR 100
+#define DATABASE_FILE "database.db"

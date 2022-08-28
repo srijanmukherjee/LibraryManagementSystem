@@ -1,0 +1,1 @@
+#define EXIT_DB_ERROR 100
