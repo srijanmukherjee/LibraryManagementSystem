@@ -55,6 +55,7 @@ private:
     void OnAddMember(wxCommandEvent& event);
     void OnLendButtonPress(wxCommandEvent& event);
     void CreateBook(std::string name, std::string author, std::string publisher, int count);
+    void UpdateBook(std::string code, std::string name, std::string author, std::string publisher, int count);
     void CreateMember(std::string fname, std::string lname, std::string email, std::string phonenumber, std::string address);
 
     wxButton* CreateControlButton(wxWindow *parent, wxWindowID id, const wxString &label);

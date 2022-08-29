@@ -265,7 +265,39 @@ void MainWindow::DeleteBook(std::string &code)
     }
 }
 
+void MainWindow::UpdateBook(std::string code, std::string name, std::string author, std::string publisher, int count)
+{
+    try {
+        Book book = Book::FindByCode(code.c_str());
+        book.name = name;
+        book.author = author;
+        book.publisher = publisher;
+        book.count = count;
+        book.Save();
+        this->booksPage->Reload();
+        this->tabNotebook->SetSelection(0);
+    } catch (std::exception &e)
+    {
+
+    }
+}
+
 void MainWindow::EditBook(std::string &code)
 {
-    wxMessageBox("Not implemented");
+    AddBookDialog *dlg = new AddBookDialog(this, wxID_ANY, _("Update book"), code);
+
+    if (dlg->ShowModal() == wxID_OK)
+    {
+        int quantity;
+        dlg->GetQuantity().ToInt(&quantity);
+        this->UpdateBook(
+            code,
+            dlg->GetName().ToStdString(),
+            dlg->GetAuthor().ToStdString(),
+            dlg->GetPublisher().ToStdString(),
+            quantity
+        );
+    }
+
+    dlg->Destroy();
 }

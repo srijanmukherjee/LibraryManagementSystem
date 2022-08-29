@@ -11,6 +11,7 @@ public:
     AddBookDialog(wxWindow *parent,
                   wxWindowID id,
                   const wxString &title,
+                  const wxString &code = wxEmptyString,
                   const wxPoint &pos = wxDefaultPosition,
                   const wxSize &size = wxDefaultSize,
                   long style = wxDEFAULT_DIALOG_STYLE,
