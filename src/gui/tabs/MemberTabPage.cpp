@@ -24,6 +24,9 @@ MemberTabPage::MemberTabPage(
 
     // list view
     listView = new MemberListCtrl(this, wxID_ANY);
+    listView->SetContextMenuCallBack([this](MemberListCtrl* list, wxListEvent& event) {
+        this->OnMemberListContextMenu(list, event);
+    });
 
     // controls
     wxBoxSizer *controlSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -58,7 +61,7 @@ void MemberTabPage::PopulateList()
         messageSizer->Show(false);
         listView->Show();
     } catch(std::exception &e) {
-        wxMessageBox("Could not load members! Contact developer");   
+        messageText->SetLabel(_("No member in our system"));
     }
 }
 
@@ -135,7 +138,7 @@ void MemberTabPage::ShowAllMembers(wxCommandEvent& event)
                 this->listView->Show(true);
             });
         } catch (std::exception& e) {
-            messageText->SetLabel(_("Could not find book"));
+            messageText->SetLabel(_("No member in our system"));
         }
 
         this->Fit();
@@ -169,6 +172,32 @@ void MemberTabPage::UpdateSearchState(bool all, wxString name, wxString email, w
     this->mLastSearchState.email = email;   
     this->mLastSearchState.phonenumber = phonenumber;   
     this->mLastSearchState.address = address;   
+}
+
+void MemberTabPage::OnMemberListContextMenu(MemberListCtrl* list, wxListEvent& event)
+{
+    wxMenu menu;
+    wxMenuItem *editItem = menu.Append(wxID_ANY, _("Update"));
+    menu.Bind(wxEVT_MENU, [this, event, list](wxCommandEvent&){
+        this->EditMemberCallback(list->items[event.GetIndex()].id);
+    }, editItem->GetId());
+
+    wxMenuItem *deleteItem = menu.Append(wxID_ANY, _("Unregister"));
+    menu.Bind(wxEVT_MENU, [this, event, list](wxCommandEvent&){
+        this->UnregisterMemberCallback(list->items[event.GetIndex()].id);
+    }, deleteItem->GetId());
+    
+    list->PopupMenu(&menu, event.GetPoint());
+}
+
+void MemberTabPage::SetUpdateMemberCallback(std::function<void(int)> func)
+{
+    this->EditMemberCallback = func;
+}
+
+void MemberTabPage::SetUnregisterMemberCallback(std::function<void(int)> func)
+{
+    this->UnregisterMemberCallback = func;
 }
 
 MemberTabPage::~MemberTabPage()

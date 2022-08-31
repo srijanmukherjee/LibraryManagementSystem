@@ -17,6 +17,7 @@ public:
     string address;
     string phonenumber;
     string email;
+    bool registered;
 
     Member();
     Member(const Member &member);
@@ -24,6 +25,7 @@ public:
     
     int Delete();
     int Save();
+    int Unregister();
 
     static Member FindById(int id);
     static vector<Member> Find(string keyword);
@@ -33,7 +35,7 @@ public:
     static int CreateModel();
 
 private:
-    Member(int id, string firstname, string lastName, string address, string phonenumber, string email, string createdOn);
+    Member(int id, string firstname, string lastName, string address, string phonenumber, string email, string createdOn, bool registered);
     int AddNew();
     int Update();
     static Member Load(sqlite3_stmt* stmt);

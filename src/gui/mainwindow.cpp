@@ -57,6 +57,12 @@ MainWindow::MainWindow(wxWindow *parent,
     lendPage = new LendTabPage(tabNotebook, wxID_ANY);
     returnPage = new ReturnTabPage(tabNotebook, wxID_ANY);
     memberPage = new MemberTabPage(tabNotebook, wxID_ANY);
+    memberPage->SetUpdateMemberCallback([this](int id){
+        this->OnUpdateMember(id);
+    });
+    memberPage->SetUnregisterMemberCallback([this](int id){
+        this->OnUnregisterMember(id);
+    });
 
     tabNotebook->AddPage(booksPage, _("Books"));
     tabNotebook->AddPage(memberPage, _("Members"));
@@ -74,7 +80,6 @@ MainWindow::MainWindow(wxWindow *parent,
     // control panel
     wxPanel *controlPanel = new wxPanel(this);
     controlPanel->SetMaxSize(wxSize(controlPanelWidth, wxEXPAND));
-    // controlPanel->SetBackgroundColour(wxColor(*wxWHITE));
 
     // control panel sizer
     wxBoxSizer *controlPanelSizer = new wxBoxSizer(wxVERTICAL);
@@ -197,7 +202,12 @@ void MainWindow::OnAddBook(wxCommandEvent& event)
 void MainWindow::CreateMember(std::string fname, std::string lname, std::string email, std::string phonenumber, std::string address)
 {
     Member member(fname, lname, address, phonenumber, email);
-    member.Save();
+    try {
+        member.Save();
+    } catch(std::exception &e)
+    {
+        spdlog::error(e.what());
+    }
     this->memberPage->Reload();
     this->tabNotebook->SetSelection(1);
 }
@@ -300,4 +310,89 @@ void MainWindow::EditBook(std::string &code)
     }
 
     dlg->Destroy();
+}
+
+bool MainWindow::UpdateMember(int id, std::string fname, std::string lname, std::string email, std::string phonenumber, std::string address)
+{
+    try {
+        Member member = Member::FindById(id);
+        member.firstName = fname;
+        member.lastName = lname;
+        member.address = address;
+        member.email = email;
+        member.phonenumber = phonenumber;
+        try {
+            if (member.Save() != 1)
+            {
+                wxMessageBox("phone or email already exists");
+                return false;
+            }
+        } catch (std::exception &e) {
+            wxMessageBox("something went wrong");
+            return false;
+        }
+    } 
+    catch (std::exception& e) {
+        wxMessageBox("Could not find member");
+    }
+
+    return true;
+}
+
+void MainWindow::OnUpdateMember(int id)
+{
+    AddMemberDialog *dlg = new AddMemberDialog(this, wxID_ANY, _("Update member"), id);
+
+    bool running = true;
+
+    while(running)
+    {
+        if (dlg->ShowModal() == wxID_OK)
+        {
+            running = !this->UpdateMember(
+                id,
+                dlg->GetFirstName().ToStdString(),
+                dlg->GetLastName().ToStdString(),
+                dlg->GetEmail().ToStdString(),
+                dlg->GetPhonenumber().ToStdString(),
+                dlg->GetAddress().ToStdString()
+            );
+        }   
+    }
+
+    this->memberPage->Reload();
+
+    dlg->Destroy();
+}
+
+void MainWindow::OnUnregisterMember(int id)
+{
+    try {
+        Member member = Member::FindById(id);
+
+        if (member.registered == false)
+        {
+            wxMessageBox("member is already unregistered\n");
+            return;
+        }
+
+        try {
+            if (History::GetHistoryOfMember(member).size() > 0)
+            {
+                wxMessageBox("Member still has some pending issued books");
+                return;
+            }
+
+            member.Unregister();
+            wxMessageBox("Member unregistered successfully");
+            this->memberPage->Reload();
+        } catch (std::exception &e)
+        {
+            wxMessageBox("Something went wrong while unregistering member");
+        }
+    } 
+    catch (std::exception& e)
+    {
+        wxMessageBox("Could not find member");
+    }
 }

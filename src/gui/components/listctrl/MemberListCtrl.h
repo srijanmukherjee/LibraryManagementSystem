@@ -2,6 +2,7 @@
 #include <wx/wxprec.h>
 #include <wx/listctrl.h>
 #include <vector>
+#include <functional>
 
 #include "models/Member.h"
 #include "controller/Library.h"
@@ -27,7 +28,7 @@ public:
     void Insert(Member &member, bool unique = false);
     void Remove(long index);
     void Clear();
-    void SetContextMenuCallBack(void (*func)(MemberListCtrl*, wxListEvent&));
+    void SetContextMenuCallBack(std::function<void(MemberListCtrl*, wxListEvent&)> func);
 
     std::vector<Member> items;
 
@@ -38,5 +39,5 @@ private:
     long GetFirstSelectedIndex();
     long FindIndexOfId(int id);
 
-    void (*contextMenuCallback)(MemberListCtrl*, wxListEvent&) = nullptr;
+    std::function<void(MemberListCtrl*, wxListEvent&)> contextMenuCallback = [] (MemberListCtrl*, wxListEvent&) { return; };
 };

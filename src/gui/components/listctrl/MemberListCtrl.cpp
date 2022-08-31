@@ -75,7 +75,7 @@ wxString MemberListCtrl::OnGetItemText(long index, long column) const
         case 3: return item.phonenumber;
         case 4: return item.address;
         case 5: return item.createdOn;
-        case 6: return "YES";
+        case 6: return item.registered ? "Yes" : "No";
         default: return "";
     }
 }
@@ -98,12 +98,6 @@ void MemberListCtrl::OnContextMenu(wxListEvent &event)
     {
         contextMenuCallback(this, event);
     }
-    // wxMenu menu;
-    // wxMenuItem *lendItem = menu.Append(wxID_ANY, _("Lend"));
-    // menu.Append(wxID_ANY, _("History"));
-    // menu.Append(wxID_ANY, _("Edit"));
-    // menu.Append(wxID_ANY, _("Delete"));
-    // PopupMenu(&menu, event.GetPoint());
 }
 
 void MemberListCtrl::SortByColumn(int column)
@@ -123,6 +117,7 @@ void MemberListCtrl::SortByColumn(int column)
             case 3: return genericCompare(b1.phonenumber, b2.phonenumber, ascending);
             case 4: return genericCompare(b1.address, b2.address, ascending);
             case 5: return genericCompare(b1.createdOn, b2.createdOn, ascending);
+            case 6: return genericCompare(b1.registered, b2.registered, ascending);
             default: return false;
         }
     });
@@ -138,7 +133,7 @@ long MemberListCtrl::FindIndexOfId(int id)
     return std::find_if(items.begin(), items.end(), [id](Member i) { return i.id == id; }) - items.begin();
 }
 
-void MemberListCtrl::SetContextMenuCallBack(void (*func)(MemberListCtrl*, wxListEvent&))
+void MemberListCtrl::SetContextMenuCallBack(std::function<void(MemberListCtrl*, wxListEvent&)> func)
 {
     this->contextMenuCallback = func;
 }

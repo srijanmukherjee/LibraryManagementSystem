@@ -1,6 +1,8 @@
 #pragma once
 #include <wx/wxprec.h>
 
+#include "models/Member.h"
+
 #ifndef WX_PRECOMP
     #include <wx/wx.h>
 #endif
@@ -11,6 +13,7 @@ public:
     AddMemberDialog(wxWindow *parent,
                   wxWindowID id,
                   const wxString &title,
+                  int memberId = -1,
                   const wxPoint &pos = wxDefaultPosition,
                   const wxSize &size = wxDefaultSize,
                   long style = wxDEFAULT_DIALOG_STYLE,

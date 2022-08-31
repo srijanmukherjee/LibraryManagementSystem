@@ -4,19 +4,19 @@
 #define NOT_SET -1
 
 Member::Member(string firstName, string lastName, string address, string phonenumber, string email)
-    : id(NOT_SET), firstName(firstName), lastName(lastName), address(address), phonenumber(phonenumber), email(email)
+    : id(NOT_SET), firstName(firstName), lastName(lastName), address(address), phonenumber(phonenumber), email(email), registered(false)
 {
     // TODO: verify the fields
 }
 
-Member::Member(int id, string firstname, string lastname, string address, string phonenumber, string email, string createdOn)
-    : id(id), firstName(firstname), lastName(lastname), address(address), phonenumber(phonenumber), email(email), createdOn(createdOn)
+Member::Member(int id, string firstname, string lastname, string address, string phonenumber, string email, string createdOn, bool registered)
+    : id(id), firstName(firstname), lastName(lastname), address(address), phonenumber(phonenumber), email(email), createdOn(createdOn), registered(registered)
 {
 }
 
 Member::Member() : id(NOT_SET) {}
 
-Member::Member(const Member &member) : id(member.id), firstName(member.firstName), lastName(member.lastName), address(member.address), phonenumber(member.phonenumber), email(member.email), createdOn(member.createdOn)
+Member::Member(const Member &member) : id(member.id), firstName(member.firstName), lastName(member.lastName), address(member.address), phonenumber(member.phonenumber), email(member.email), createdOn(member.createdOn), registered(member.registered)
 {
     
 }
@@ -29,7 +29,8 @@ int Member::CreateModel()
                       "address VARCHAR(200) NOT NULL,"
                       "phonenumber VARCHER(13) UNIQUE NOT NULL,"
                       "email VARCHAR(100) UNIQUE NOT NULL,"
-                      "createdOn TIMESTAMP DEFAULT CURRENT_TIMESTAMP)";
+                      "createdOn TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"
+                      "registered INTEGER DEFAULT 1)";
 
     spdlog::debug("Creating model `Member`\nExecuting\n{}", SQL);
 
@@ -46,13 +47,21 @@ Member Member::Load(sqlite3_stmt *stmt)
     string phonenumber((char*)sqlite3_column_text(stmt, 4));
     string email((char*)sqlite3_column_text(stmt, 5));
     string createdOn((char*)sqlite3_column_text(stmt, 6));
-    return Member(id, firstName, lastName, address, phonenumber, email, createdOn);
+    bool registered = sqlite3_column_int(stmt, 7);
+    return Member(id, firstName, lastName, address, phonenumber, email, createdOn, registered);
 }
 
 int Member::Save()
 {
     return id == NOT_SET ? AddNew() : Update();
 }
+
+int Member::Unregister()
+{
+    registered = false;
+    return Update();
+}
+
 
 int Member::AddNew()
 {
@@ -71,6 +80,7 @@ int Member::AddNew()
     if (returnCode == SQLITE_DONE)
     {
         id = sqlite3_last_insert_rowid(Model::conn);
+        registered = true;
     }
 
     return returnCode == SQLITE_DONE;
@@ -79,7 +89,7 @@ int Member::AddNew()
 int Member::Update()
 {
     sqlite3_stmt* stmt = Model::PrepareStatement(
-        "UPDATE Member SET firstName=?, lastName=?, address=?, phonenumber=?, email=? WHERE id=?"
+        "UPDATE Member SET firstName=?, lastName=?, address=?, phonenumber=?, email=?, registered=? WHERE id=?"
     );
 
     sqlite3_bind_text(stmt, 1, firstName.c_str(), -1, NULL);
@@ -87,7 +97,8 @@ int Member::Update()
     sqlite3_bind_text(stmt, 3, address.c_str(), -1, NULL);
     sqlite3_bind_text(stmt, 4, phonenumber.c_str(), -1, NULL);
     sqlite3_bind_text(stmt, 5, email.c_str(), -1, NULL);
-    sqlite3_bind_int(stmt, 6, id);
+    sqlite3_bind_int(stmt, 6, registered);
+    sqlite3_bind_int(stmt, 7, id);
 
     int returnCode = sqlite3_step(stmt);
     sqlite3_finalize(stmt);

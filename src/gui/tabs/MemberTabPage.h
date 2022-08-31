@@ -1,5 +1,6 @@
 #pragma once
 #include <wx/wxprec.h>
+#include <functional>
 
 #include "../BookListCtrl.h"
 #include "models/Book.h"
@@ -25,6 +26,8 @@ public:
     void Search(wxString name, wxString email, wxString phonenumber, wxString address);
     void UpdateSearchState(bool all = true, wxString name = wxEmptyString, wxString email = wxEmptyString, wxString phonenumber = wxEmptyString, wxString address = wxEmptyString);
     void Reload();
+    void SetUpdateMemberCallback(std::function<void(int)> func);
+    void SetUnregisterMemberCallback(std::function<void(int)> func);
     
 private:
     wxBoxSizer *mainSizer = nullptr;
@@ -32,6 +35,7 @@ private:
     wxStaticText *messageText = nullptr;
     MemberListCtrl *listView = nullptr;
 
+    void OnMemberListContextMenu(MemberListCtrl *list, wxListEvent& event);
     void ShowAllMembers(wxCommandEvent& event);
     void Refresh(wxCommandEvent& event);
     void PopulateList();
@@ -43,4 +47,7 @@ private:
         wxString phonenumber; 
         wxString address;
     } mLastSearchState;
+
+    std::function<void(int)> EditMemberCallback = [](int id) {return;};
+    std::function<void(int)> UnregisterMemberCallback = [](int id) {return;};
 };

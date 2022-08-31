@@ -155,6 +155,12 @@ void LendTabPage::SearchMember(int id)
     try
     {
         Member _member = Member::FindById(id);
+        if (!_member.registered)
+        {
+            wxMessageBox("Member is not registered\n");
+            return;
+        }
+        
         if (this->member != nullptr)
         {
             delete this->member;
