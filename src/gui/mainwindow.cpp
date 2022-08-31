@@ -63,6 +63,9 @@ MainWindow::MainWindow(wxWindow *parent,
     memberPage->SetUnregisterMemberCallback([this](int id){
         this->OnUnregisterMember(id);
     });
+    memberPage->SetRegisterMemberCallback([this](int id){
+        this->OnRegisterMember(id);
+    });
 
     tabNotebook->AddPage(booksPage, _("Books"));
     tabNotebook->AddPage(memberPage, _("Members"));
@@ -389,6 +392,32 @@ void MainWindow::OnUnregisterMember(int id)
         } catch (std::exception &e)
         {
             wxMessageBox("Something went wrong while unregistering member");
+        }
+    } 
+    catch (std::exception& e)
+    {
+        wxMessageBox("Could not find member");
+    }
+}
+
+void MainWindow::OnRegisterMember(int id)
+{
+    try {
+        Member member = Member::FindById(id);
+
+        if (member.registered == true)
+        {
+            wxMessageBox("member is already registered\n");
+            return;
+        }
+
+        try {
+            member.Register();
+            wxMessageBox("Member registered successfully");
+            this->memberPage->Reload();
+        } catch (std::exception &e)
+        {
+            wxMessageBox("Something went wrong while registering member");
         }
     } 
     catch (std::exception& e)

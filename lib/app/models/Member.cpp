@@ -62,6 +62,11 @@ int Member::Unregister()
     return Update();
 }
 
+int Member::Register()
+{
+    registered = true;
+    return Update();
+}
 
 int Member::AddNew()
 {

@@ -28,6 +28,7 @@ public:
     void Reload();
     void SetUpdateMemberCallback(std::function<void(int)> func);
     void SetUnregisterMemberCallback(std::function<void(int)> func);
+    void SetRegisterMemberCallback(std::function<void(int)> func);
     
 private:
     wxBoxSizer *mainSizer = nullptr;
@@ -50,4 +51,5 @@ private:
 
     std::function<void(int)> EditMemberCallback = [](int id) {return;};
     std::function<void(int)> UnregisterMemberCallback = [](int id) {return;};
+    std::function<void(int)> RegisterMemberCallback = [](int id) {return;};
 };

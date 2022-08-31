@@ -60,6 +60,7 @@ private:
     bool UpdateMember(int id, std::string fname, std::string lname, std::string email, std::string phonenumber, std::string address);
     void OnUpdateMember(int id);
     void OnUnregisterMember(int id);
+    void OnRegisterMember(int id);
 
     wxButton* CreateControlButton(wxWindow *parent, wxWindowID id, const wxString &label);
 

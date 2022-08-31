@@ -182,10 +182,20 @@ void MemberTabPage::OnMemberListContextMenu(MemberListCtrl* list, wxListEvent& e
         this->EditMemberCallback(list->items[event.GetIndex()].id);
     }, editItem->GetId());
 
-    wxMenuItem *deleteItem = menu.Append(wxID_ANY, _("Unregister"));
-    menu.Bind(wxEVT_MENU, [this, event, list](wxCommandEvent&){
-        this->UnregisterMemberCallback(list->items[event.GetIndex()].id);
-    }, deleteItem->GetId());
+    if (!list->items[event.GetIndex()].registered)
+    {
+        wxMenuItem *registerItem = menu.Append(wxID_ANY, _("Register"));
+        menu.Bind(wxEVT_MENU, [this, event, list](wxCommandEvent&){
+            this->RegisterMemberCallback(list->items[event.GetIndex()].id);
+        }, registerItem->GetId());
+    } 
+    else
+    {
+        wxMenuItem *deleteItem = menu.Append(wxID_ANY, _("Unregister"));
+        menu.Bind(wxEVT_MENU, [this, event, list](wxCommandEvent&){
+            this->UnregisterMemberCallback(list->items[event.GetIndex()].id);
+        }, deleteItem->GetId());
+    }
     
     list->PopupMenu(&menu, event.GetPoint());
 }
@@ -198,6 +208,11 @@ void MemberTabPage::SetUpdateMemberCallback(std::function<void(int)> func)
 void MemberTabPage::SetUnregisterMemberCallback(std::function<void(int)> func)
 {
     this->UnregisterMemberCallback = func;
+}
+
+void MemberTabPage::SetRegisterMemberCallback(std::function<void(int)> func)
+{
+    this->RegisterMemberCallback = func;
 }
 
 MemberTabPage::~MemberTabPage()

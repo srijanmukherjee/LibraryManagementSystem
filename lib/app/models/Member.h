@@ -26,6 +26,7 @@ public:
     int Delete();
     int Save();
     int Unregister();
+    int Register();
 
     static Member FindById(int id);
     static vector<Member> Find(string keyword);
